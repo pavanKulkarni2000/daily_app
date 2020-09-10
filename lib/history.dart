@@ -1,8 +1,9 @@
 import 'package:daily_app/myScreens.dart';
 import 'package:flutter/cupertino.dart';
-import 'main.dart';
-import 'dbHelper.dart';
 import 'package:flutter/material.dart';
+
+import 'dbHelper.dart';
+import 'main.dart';
 
 class HistoryPage extends StatefulWidget {
   @override
@@ -210,7 +211,7 @@ class _historyTile extends State<historyTile> {
   @override
   Widget build(BuildContext context) {
     DateTime date =
-        DateTime.fromMicrosecondsSinceEpoch(row[DatabaseHelper.columnDate]);
+        DateTime.fromMillisecondsSinceEpoch(row[DatabaseHelper.columnDate]);
     return Card(
       color: color,
       child: ListTile(

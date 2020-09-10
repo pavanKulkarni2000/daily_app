@@ -2,8 +2,9 @@ import 'package:daily_app/myScreens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'history.dart';
+
 import 'dbHelper.dart';
+import 'history.dart';
 import 'settings.dart';
 import 'sms.dart';
 
@@ -119,7 +120,7 @@ getHomeButton(int i, _HomePageState state) {
       onPressed: () => {
         sendSms(i, prefs.getString('phone')),
         DatabaseHelper.instance.insert({
-          DatabaseHelper.columnDate: DateTime.now().microsecondsSinceEpoch,
+          DatabaseHelper.columnDate: DateTime.now().millisecondsSinceEpoch,
           DatabaseHelper.columnPurchased: i
         }),
         prefs.setBool("today", true),
