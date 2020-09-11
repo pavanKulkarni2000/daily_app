@@ -46,3 +46,27 @@ errorScreen(String error) {
     ),
   );
 }
+
+getDoneScreen() {
+  return Stack(fit: StackFit.expand, children: [
+    Opacity(
+      opacity: 0.75,
+      child: Container(
+        color: Colors.black,
+      ),
+    ),
+    Icon(
+      Icons.done,
+      color: Colors.green,
+      size: 100,
+    ),
+    Container(
+      alignment: Alignment.center,
+      child: Text(
+        "Done for Today",
+        style: TextStyle(
+            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
+      ),
+    )
+  ]);
+}

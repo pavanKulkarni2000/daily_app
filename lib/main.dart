@@ -52,7 +52,7 @@ class _HomePageState extends State<HomePage> {
     (SharedPreferences.getInstance()).then((val) => {
           prefs = val,
           print("init"),
-          setState(() => currentPage = getHomeScreen(this)),
+          setState(() => currentPage = getHomeScreen()),
         });
   }
 
@@ -81,8 +81,8 @@ class _HomePageState extends State<HomePage> {
                 context, MaterialPageRoute(builder: (context) => HistoryPage()))
           else
             {
-              setState(() => currentPage =
-                  index == 0 ? SettingsPage() : getHomeScreen(this)),
+              setState(() =>
+              currentPage = index == 0 ? SettingsPage() : getHomeScreen()),
               currentTab = index,
             }
         },
@@ -90,77 +90,61 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: Colors.white,
     );
   }
-}
 
-getHomeScreen(_HomePageState state) {
-  state.homeStack = [
-    Center(
-      child: Wrap(children: [
-        Column(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            for (var i = 0; i < 4; i++) getHomeButton(i, state)
-          ],
-        )
-      ]),
-    ),
-  ];
-  if (prefs.getBool('today')) state.homeStack.insert(1, getDoneScreen());
-  return Stack(
-    children: state.homeStack,
-    fit: StackFit.expand,
-  );
-}
-
-getHomeButton(int i, _HomePageState state) {
-  return Container(
-    padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 10),
-    child: RaisedButton(
-      onPressed: () => {
-        sendSms(i, prefs.getString('phone')),
-        DatabaseHelper.instance.insert({
-          DatabaseHelper.columnDate: DateTime.now().millisecondsSinceEpoch,
-          DatabaseHelper.columnPurchased: i
-        }),
-        prefs.setBool("today", true),
-        state.setState(() => state.homeStack.insert(1, getDoneScreen())),
-      },
-      child: Text(DatabaseHelper.items[i],
-          style: TextStyle(
-            fontSize: 40,
-            color: Colors.indigoAccent,
-          )),
-      padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
-      color: Colors.white,
-      splashColor: Colors.black12,
-      shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(18.0),
-          side: BorderSide(color: Colors.blueAccent, width: 3)),
-    ),
-  );
-}
-
-getDoneScreen() {
-  return Stack(fit: StackFit.expand, children: [
-    Opacity(
-      opacity: 0.75,
-      child: Container(
-        color: Colors.black,
+  getHomeScreen() {
+    homeStack = [
+      Center(
+        child: Wrap(children: [
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: <Widget>[for (var i = 0; i < 4; i++) getHomeButton(i)],
+          )
+        ]),
       ),
-    ),
-    Icon(
-      Icons.done,
-      color: Colors.green,
-      size: 100,
-    ),
-    Container(
-      alignment: Alignment.center,
-      child: Text(
-        "Done for Today",
-        style: TextStyle(
-            color: Colors.white, fontWeight: FontWeight.bold, fontSize: 30),
+    ];
+    if (prefs.getBool('today')) homeStack.insert(1, getDoneScreen());
+    return Stack(
+      children: homeStack,
+      fit: StackFit.expand,
+    );
+  }
+
+  getHomeButton(int i) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 50.0, vertical: 10),
+      child: RaisedButton(
+        onPressed: () =>
+        {
+          sendSms(i, prefs.getString('phone')),
+          DatabaseHelper.instance.insert({
+            DatabaseHelper.columnDate: DateTime
+                .now()
+                .millisecondsSinceEpoch,
+            DatabaseHelper.columnPurchased: i
+          }),
+          prefs.setBool("today", true),
+          setState(() =>
+          {
+            homeStack.insert(1, getDoneScreen()),
+            currentPage = Stack(
+              children: homeStack,
+              fit: StackFit.expand,
+            )
+          }),
+        },
+        child: Text(DatabaseHelper.items[i],
+            style: TextStyle(
+              fontSize: 40,
+              color: Colors.indigoAccent,
+            )),
+        padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
+        color: Colors.white,
+        splashColor: Colors.black12,
+        shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18.0),
+            side: BorderSide(color: Colors.blueAccent, width: 3)),
       ),
-    )
-  ]);
+    );
+  }
 }
