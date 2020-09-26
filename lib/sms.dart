@@ -14,7 +14,7 @@ Future sendSms(int i, recipient) async {
   if (i != 3)
     message += " ಬೇಕು";
   else
-    message = DatabaseHelper.items[2] + message;
+    message = DatabaseHelper.items[2] + " " + message;
 
   print("trying to send SMS");
   try {

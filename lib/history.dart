@@ -5,15 +5,27 @@ import 'dbHelper.dart';
 import 'main.dart';
 
 class HistoryPage extends StatefulWidget {
+  List<Map<String, dynamic>> allRows;
+  List<Map<String, dynamic>> selected = List();
+
   @override
-  HistoryPageState createState() => HistoryPageState();
+  HistoryPageState createState() => HistoryPageState(allRows, selected);
 }
 
-DatabaseHelper helper = DatabaseHelper.instance;
+DatabaseHelper helper;
 
 class HistoryPageState extends State<HistoryPage> {
   List<Map<String, dynamic>> allRows;
   List<Map<String, dynamic>> selected = List();
+
+  HistoryPageState(this.allRows, this.selected);
+
+  Future<List<Map<String, dynamic>>> fetchAllRows() async {
+    List<Map<String, dynamic>> list = await helper.queryAllRows();
+    this.allRows = List.generate(
+        list.length, (int index) => Map<String, dynamic>.from(list[index]));
+    return list;
+  }
 
   List<Widget> calculate(List list) {
     var sum, m = 0, c = 0;
@@ -49,17 +61,39 @@ class HistoryPageState extends State<HistoryPage> {
     ];
   }
 
-
   void _alert() {
     if (selected.isNotEmpty) {
-      setState(() => {for (var ele in selected) allRows.remove(ele)});
-      Map mx = selected
-          .reduce((value, ele) =>
-      value[DatabaseHelper.columnDate] < ele[DatabaseHelper.columnDate]
-          ? ele
-          : value);
-      helper.deleteAllBefore(mx[DatabaseHelper.columnDate]);
-      selected.clear();
+      Map mx;
+      showDialog(
+        builder: (_) =>
+            AlertDialog(
+              title: Text("Alert"),
+              content: Text("Do you want to delete the selected?"),
+              actions: [
+                FlatButton(
+                    child: Text("Cancel"),
+                    onPressed: () => Navigator.pop(context)),
+                FlatButton(
+                    child: Text("OK"),
+                    onPressed: () =>
+                    {
+                      setState(() =>
+                      {for (var ele in selected) allRows.remove(ele)}),
+                      mx = selected.reduce((value, ele) =>
+                      value[DatabaseHelper.columnDate] <
+                          ele[DatabaseHelper.columnDate]
+                          ? ele
+                          : value),
+                      helper.deleteAllBefore(mx[DatabaseHelper.columnDate]),
+                      selected.clear(),
+                      Navigator.pop(context)
+                    }),
+              ],
+              elevation: 24.0,
+            ),
+        context: context,
+        barrierDismissible: true,
+      );
     } else if (allRows.isNotEmpty)
       showDialog(
         builder: (_) =>
@@ -78,12 +112,113 @@ class HistoryPageState extends State<HistoryPage> {
                       Navigator.pop(context)
                     }),
               ],
-          elevation: 24.0,
-        ),
+              elevation: 24.0,
+            ),
         context: context,
         barrierDismissible: true,
       );
+  }
 
+  Widget AddItem(context) {
+    HistoryPageState history = this;
+    Map<String, dynamic> gen;
+    DateTime selectedDate = DateTime.now();
+    int selectedChoice = 3;
+    int i;
+
+    showDialog(
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: Text("Add Entry"),
+              content: Wrap(
+                  direction: Axis.vertical,
+                  verticalDirection: VerticalDirection.down,
+                  children: [
+                    Wrap(
+                      children: [
+                        Text("Pick date:"),
+                        FlatButton(
+                            color: Colors.grey[300],
+                            child: Text(
+                                "${selectedDate.day}/${selectedDate
+                                    .month}/${selectedDate.year}"),
+                            onPressed: () async =>
+                            ({
+                              selectedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2200)),
+                              setState(() => selectedDate = selectedDate),
+                            }))
+                      ],
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                    ),
+                    DropdownButton<int>(
+                      value: selectedChoice,
+                      icon: Icon(Icons.arrow_downward),
+                      iconSize: 24,
+                      elevation: 16,
+                      style: TextStyle(color: Colors.deepPurple),
+                      underline: Container(
+                        height: 2,
+                        color: Colors.deepPurpleAccent,
+                      ),
+                      onChanged: (int newValue) {
+                        setState(() {
+                          selectedChoice = newValue;
+                        });
+                      },
+                      items: List.generate(
+                          4,
+                              (index) =>
+                              DropdownMenuItem(
+                                value: index,
+                                child: Text(DatabaseHelper.items[index]),
+                                onTap: () => selectedChoice = index,
+                              )),
+                    ),
+                  ]),
+              actions: [
+                FlatButton(
+                    child: Text("Cancel"),
+                    onPressed: () {
+                      Navigator.pop(context);
+                      selectedDate = null;
+                    }),
+                FlatButton(
+                    child: Text("OK"),
+                    onPressed: () =>
+                    {
+                      gen = {
+                        DatabaseHelper.columnDate:
+                        selectedDate.millisecondsSinceEpoch,
+                        DatabaseHelper.columnPurchased: selectedChoice
+                      },
+                      i = allRows.indexWhere((element) =>
+                      element[DatabaseHelper.columnDate] >
+                          gen[DatabaseHelper.columnDate]),
+                      history.setState(() =>
+                      {
+                        if (i != -1)
+                          allRows.insert(i, gen)
+                        else
+                          allRows.add(gen)
+                      }),
+                      Navigator.pop(context),
+                      helper.insert(gen)
+                    })
+              ],
+              elevation: 24.0,
+            );
+          },
+        );
+      },
+      context: context,
+      barrierDismissible: true,
+    );
   }
 
   @override
@@ -91,7 +226,13 @@ class HistoryPageState extends State<HistoryPage> {
     return Scaffold(
       appBar: AppBar(title: Text('ನಂದಿನಿ'), actions: <Widget>[
         IconButton(
-          icon: Icon(Icons.delete_sweep),
+          icon: Icon(Icons.add),
+          onPressed: () => selected.length != 0 ? null : AddItem(context),
+          alignment: Alignment.centerRight,
+          iconSize: 30,
+        ),
+        IconButton(
+          icon: Icon(selected.length == 0 ? Icons.delete_sweep : Icons.clear),
           onPressed: () => _alert(),
           alignment: Alignment.centerRight,
           iconSize: 30,
@@ -99,14 +240,10 @@ class HistoryPageState extends State<HistoryPage> {
       ]),
       body: allRows == null
           ? FutureBuilder(
-          future: helper.queryAllRows(),
+          future: fetchAllRows(),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               print("done loading");
-              allRows = List.generate(
-                  snapshot.data.length,
-                      (int index) =>
-                  Map<String, dynamic>.from(snapshot.data[index]));
               return historyScreen();
             } else if (snapshot.hasError) {
               print("Error: ${snapshot.error}");
@@ -128,8 +265,8 @@ class HistoryPageState extends State<HistoryPage> {
                   title: Text("Sum"),
                   content: Column(
                     mainAxisSize: MainAxisSize.min,
-                    children: calculate(
-                        selected.length > 0 ? selected : allRows),
+                    children:
+                    calculate(selected.length > 0 ? selected : allRows),
                   ),
                   actions: [
                     FlatButton(
@@ -185,9 +322,7 @@ class HistoryPageState extends State<HistoryPage> {
   }
 }
 
-
 class HistoryList extends StatefulWidget {
-
   HistoryPageState historyPage;
 
   HistoryList(this.historyPage);
@@ -197,7 +332,6 @@ class HistoryList extends StatefulWidget {
 }
 
 class ListState extends State<HistoryList> {
-
   HistoryPageState historyPage;
 
   ListState(this.historyPage);

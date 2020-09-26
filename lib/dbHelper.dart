@@ -1,8 +1,7 @@
 import 'dart:async';
-import 'dart:io';
+
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-import 'package:path_provider/path_provider.dart';
 
 class DatabaseHelper {
   static final databaseName = "daily_database.db";
@@ -31,26 +30,24 @@ class DatabaseHelper {
   Future<Database> get database async {
     if (_database != null) return _database;
     // lazily instantiate the db the first time it is accessed
-    _database = await _initDatabase();
-    return _database;
-  }
-
-  // this opens the database (and creates it if it doesn't exist)
-  _initDatabase() async {
-    Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, databaseName);
-    return await openDatabase(path,
-        version: databaseVersion, onCreate: _onCreate);
-  }
-
-  // SQL code to create the database table
-  Future _onCreate(Database db, int version) async {
-    await db.execute('''
+    _database = await openDatabase(
+      // Set the path to the database.
+      join(await getDatabasesPath(), databaseName),
+      // When the database is first created, create a table to store dogs.
+      onCreate: (db, version) {
+        // Run the CREATE TABLE statement on the database.
+        return db.execute('''
           CREATE TABLE $table (
             $columnDate INTEGER PRIMARY KEY,
             $columnPurchased INTEGER
           )
           ''');
+      },
+      // Set the version. This executes the onCreate function and provides a
+      // path to perform database upgrades and downgrades.
+      version: 1,
+    );
+    return _database;
   }
 
   // Helper methods
@@ -89,6 +86,7 @@ class DatabaseHelper {
   // Deletes all the rows. The number of affected rows is
   // returned.
   Future<int> deleteAll() async {
+    print("deleting all rows");
     Database db = await instance.database;
     return await db.delete(table);
   }

@@ -21,4 +21,11 @@
         <item name="android:layout_height">1dp</item>
         <item name="android:background">@android:color/darker_gray</item>
     </style>
+
+    <style name="MyTransparentBottomSheetDialogTheme" parent="Theme.MaterialComponents.BottomSheetDialog">
+
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+    </style>
 </resources>

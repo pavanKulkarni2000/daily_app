@@ -1,6 +1,7 @@
 import 'package:daily_app/myScreens.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'dbHelper.dart';
@@ -49,11 +50,28 @@ class _HomePageState extends State<HomePage> {
   initState() {
     super.initState();
     currentPage = waitingScreen();
-    (SharedPreferences.getInstance()).then((val) => {
-          prefs = val,
-          print("init"),
-          setState(() => currentPage = getHomeScreen()),
-        });
+    (SharedPreferences.getInstance())
+        .then((val) => {
+              prefs = val,
+              helper = DatabaseHelper.instance,
+              if (!prefs.containsKey("phone"))
+                {
+                  prefs.setString("phone", "9035163860"),
+                  prefs.setBool("today", false),
+                  prefs.setDouble("milk", 20),
+                  prefs.setDouble("curd", 21),
+                  prefs.setString("alarm",
+                      "${DateTime.now().add(Duration(days: -3)).millisecondsSinceEpoch}"),
+                  Permission.sms.request()
+                },
+              print("init"),
+              setState(() => currentPage = getHomeScreen()),
+            })
+        .then((_) => platform.invokeMethod("setAlarm"))
+        .then((value) => {helper.database, print(value)})
+        .catchError((err) {
+      print("caught $err");
+    });
   }
 
   @override
@@ -103,6 +121,7 @@ class _HomePageState extends State<HomePage> {
         ]),
       ),
     ];
+    prefs.reload();
     if (prefs.getBool('today')) homeStack.insert(1, getDoneScreen());
     return Stack(
       children: homeStack,
@@ -116,26 +135,51 @@ class _HomePageState extends State<HomePage> {
       child: RaisedButton(
         onPressed: () =>
         {
-          sendSms(i, prefs.getString('phone')),
-          DatabaseHelper.instance.insert({
-            DatabaseHelper.columnDate: DateTime
-                .now()
-                .millisecondsSinceEpoch,
-            DatabaseHelper.columnPurchased: i
-          }),
-          prefs.setBool("today", true),
-          setState(() =>
-          {
-            homeStack.insert(1, getDoneScreen()),
-            currentPage = Stack(
-              children: homeStack,
-              fit: StackFit.expand,
-            )
-          }),
+          showDialog(
+            builder: (_) =>
+                AlertDialog(
+                  title: Text("Alert"),
+                  content: Text(
+                      "Are u sure u want to order ${DatabaseHelper.items[i]}?"),
+                  actions: [
+                    FlatButton(
+                        child: Text("Cancel"),
+                        onPressed: () => Navigator.pop(context)),
+                    FlatButton(
+                        child: Text("OK"),
+                        onPressed: () =>
+                        {
+                          sendSms(i, prefs.getString('phone')),
+                          DatabaseHelper.instance.insert({
+                            DatabaseHelper.columnDate:
+                            DateTime
+                                .now()
+                                .millisecondsSinceEpoch,
+                            DatabaseHelper.columnPurchased: i
+                          }),
+                          prefs
+                              .setBool("today", true)
+                              .then((value) =>
+                              setState(() =>
+                              {
+                                homeStack.insert(1, getDoneScreen()),
+                                currentPage = Stack(
+                                  children: homeStack,
+                                  fit: StackFit.expand,
+                                )
+                              })),
+                          Navigator.pop(context)
+                        }),
+                  ],
+                  elevation: 24.0,
+                ),
+            context: context,
+            barrierDismissible: true,
+          ),
         },
         child: Text(DatabaseHelper.items[i],
             style: TextStyle(
-              fontSize: 40,
+              fontSize: 32,
               color: Colors.indigoAccent,
             )),
         padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
