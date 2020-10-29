@@ -1,6 +1,6 @@
 # daily_app
 
-A new Flutter application.
+An app to handle daily order for dairy.
 
 ## Getting Started
 
