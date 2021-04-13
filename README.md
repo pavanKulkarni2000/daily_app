@@ -5,7 +5,7 @@ An app to handle daily order for dairy.
 ## Screen shots
 
 <img src="ss/home.jpg" width="300" >
-<center><h3 style="text-align: center;"> home </h3></center>
+<center> home </center>
 <br>
 <br>
 <br>
