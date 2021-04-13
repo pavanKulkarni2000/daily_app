@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="cancel">Cancel</string>
+    <string name="op0">"ಹಾಲು"</string>
+    <string name="op1">"ಮೊಸರು"</string>
+    <string name="op2">"ಹಾಲು - ಮೊಸರು"</string>
+</resources>
