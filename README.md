@@ -4,7 +4,7 @@ An app to handle daily order for dairy.
 
 ## Screen shots
 
-<img src="ss/home.jpg" alt="home" width="150" >
+<img src="ss/home.jpg" alt="home" width="300" >
 <img src="ss/history.jpg" alt="history">
 <img src="ss/deleteAll.jpg" alt="deleteAll">
 <img src="ss/selection.jpg" alt="selection">
