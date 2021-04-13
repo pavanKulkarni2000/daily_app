@@ -4,15 +4,14 @@ An app to handle daily order for dairy.
 
 ## Screen shots
 
-![](ss/home.jpg)
-![](ss/history.jpg)
-![](ss/deleteAll.jpg)
-![](ss/selection.jpg)
-![](ss/deleteSel.jpg)
-![](ss/modifyOpt.jpg)
-![](ss/addEntry.jpg)
-![](ss/sum.jpg)
-![](ss/settings.jpg)
-![](ss/editVar.jpg)
-![](ss/done.jpg)
-
+<img src="ss/home.jpg" alt="home" width="150" >
+<img src="ss/history.jpg" alt="history">
+<img src="ss/deleteAll.jpg" alt="deleteAll">
+<img src="ss/selection.jpg" alt="selection">
+<img src="ss/deleteSel.jpg" alt="deleteSelected">
+<img src="ss/modifyOpt.jpg" alt="modifyOption">
+<img src="ss/addEntry.jpg" alt="addEntry">
+<img src="ss/sum.jpg" alt="calculateSum">
+<img src="ss/settings.jpg" alt="settings">
+<img src="ss/editVar.jpg" alt="editVariables">
+<img src="ss/done.jpg" alt="doneForTheDay">
