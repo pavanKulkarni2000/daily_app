@@ -7,6 +7,8 @@ An app to handle daily order for dairy.
 <img src="ss/home.jpg" width="300" >
 <center><em> home </em></center>
 <br>
+<br>
+<br>
 <img src="ss/history.jpg" title="history" width="300" >
 <center><em> history </em></center>
 <br>
