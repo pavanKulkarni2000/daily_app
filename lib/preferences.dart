@@ -26,7 +26,7 @@ getData(Map map) async {
   phone = prefs.getString('phone');
   if (phone == null) {
     print("setting phone");
-    phone = "9035163860";
+    phone = "0000000000";
     await prefs.setString('phone', phone);
   }
   double milk;
